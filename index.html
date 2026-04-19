@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI教学知识库平台 · 企业招聘端</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#F0F2F7;color:#1a2035;font-size:14px;}
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* 侧边栏 */
+.sidebar{width:220px;min-width:220px;background:#1a2035;display:flex;flex-direction:column;transition:width .25s;z-index:100;overflow:hidden;}
+.sidebar.collapsed{width:64px;min-width:64px;}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer;flex-shrink:0;}
+.sb-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#3B7EF8,#6C5CE7);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.sb-logo-text{color:#fff;font-size:13px;font-weight:700;white-space:nowrap;line-height:1.3;}
+.sb-logo-text small{display:block;font-size:11px;font-weight:400;color:rgba(255,255,255,.45);margin-top:2px;}
+.sidebar.collapsed .sb-logo-text{display:none;}
+.sb-nav{flex:1;padding:10px 0;overflow-y:auto;overflow-x:hidden;}
+.sb-section{padding:10px 16px 4px;font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.08em;white-space:nowrap;}
+.sidebar.collapsed .sb-section{opacity:0;}
+.sb-item{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;color:rgba(255,255,255,.55);border-radius:8px;margin:1px 8px;transition:all .15s;white-space:nowrap;border:none;background:none;width:calc(100% - 16px);text-align:left;font-size:13px;}
+.sb-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.sb-item.active{background:linear-gradient(90deg,rgba(59,126,248,.4),rgba(59,126,248,.12));color:#fff;}
+.si-icon{font-size:17px;flex-shrink:0;width:22px;text-align:center;}
+.si-label{font-size:13px;}
+.sidebar.collapsed .si-label{display:none;}
+.si-badge{margin-left:auto;background:#FF4757;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;flex-shrink:0;}
+.sidebar.collapsed .si-badge{display:none;}
+.sb-footer{padding:10px 8px;border-top:1px solid rgba(255,255,255,.08);flex-shrink:0;}
+.sb-company{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;}
+.sb-av{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#FF6B6B,#FF8E53);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;}
+.sb-cname{color:#fff;font-size:13px;font-weight:600;white-space:nowrap;}
+.sb-cplan{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;}
+.sidebar.collapsed .sb-cname,.sidebar.collapsed .sb-cplan{display:none;}
+
+/* 主区域 */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{height:60px;background:#fff;border-bottom:1px solid #eaecf2;display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0;}
+.tb-toggle{width:34px;height:34px;border:none;background:#F0F2F7;border-radius:8px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.tb-title{font-size:16px;font-weight:700;}
+.tb-sub{font-size:12px;color:#8a94a8;}
+.tb-spacer{flex:1;}
+.tb-search{display:flex;align-items:center;background:#F0F2F7;border-radius:8px;padding:0 12px;height:34px;gap:8px;width:220px;}
+.tb-search input{border:none;background:transparent;outline:none;font-size:13px;color:#1a2035;width:100%;}
+.tb-search input::placeholder{color:#b0b8c9;}
+.tb-btn{width:34px;height:34px;border:none;background:#F0F2F7;border-radius:8px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;position:relative;}
+.tb-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:#FF4757;border-radius:50%;border:2px solid #fff;}
+.tb-uav{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#FF6B6B,#FF8E53);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;cursor:pointer;}
+.content{flex:1;overflow-y:auto;padding:24px;}
+
+/* 页面切换 */
+.page{display:none;}
+.page.active{display:block;animation:fadeIn .18s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+
+/* 卡片 */
+.card{background:#fff;border-radius:14px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:16px;}
+.card:last-child{margin-bottom:0;}
+.card-title{font-size:15px;font-weight:700;color:#1a2035;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.ct-sub{font-size:12px;font-weight:400;color:#8a94a8;}
+.ct-space{flex:1;}
+
+/* 统计 */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;}
+.stat-card{background:#fff;border-radius:14px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;align-items:flex-start;gap:14px;}
+.stat-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.si-blue{background:#EBF2FF;}.si-green{background:#E8F8F0;}.si-orange{background:#FFF4E8;}.si-purple{background:#F0EBFF;}
+.stat-num{font-size:26px;font-weight:800;color:#1a2035;line-height:1.1;}
+.stat-label{font-size:12px;color:#8a94a8;margin-top:4px;}
+.stat-trend{font-size:11px;margin-top:5px;}
+.t-up{color:#00C48C;}.t-dn{color:#FF4757;}
+
+/* 按钮 */
+.btn{height:34px;padding:0 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:#3B7EF8;color:#fff;}.btn-primary:hover{background:#2d6de8;}
+.btn-outline{background:#fff;color:#3B7EF8;border:1px solid #3B7EF8;}.btn-outline:hover{background:#EBF2FF;}
+.btn-ghost{background:#F0F2F7;color:#1a2035;}.btn-ghost:hover{background:#e4e7ef;}
+.btn-danger{background:#FFF0F0;color:#FF4757;}.btn-success{background:#E8F8F0;color:#00C48C;}
+.btn-sm{height:28px;padding:0 12px;font-size:12px;}
+.btn-xs{height:24px;padding:0 10px;font-size:11px;}
+
+/* 标签 */
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap;}
+.tag-blue{background:#EBF2FF;color:#3B7EF8;}.tag-green{background:#E8F8F0;color:#00C48C;}
+.tag-orange{background:#FFF4E8;color:#FF8C42;}.tag-red{background:#FFF0F0;color:#FF4757;}
+.tag-purple{background:#F0EBFF;color:#6C5CE7;}.tag-gray{background:#F0F2F7;color:#8a94a8;}
+
+/* 头像 */
+.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0;}
+.av-sm{width:28px;height:28px;font-size:11px;}.av-lg{width:44px;height:44px;font-size:16px;}
+.av-blue{background:linear-gradient(135deg,#3B7EF8,#6C5CE7);}
+.av-green{background:linear-gradient(135deg,#00C48C,#00B09B);}
+.av-orange{background:linear-gradient(135deg,#FF8C42,#FF6B6B);}
+.av-purple{background:linear-gradient(135deg,#6C5CE7,#a29bfe);}
+.av-pink{background:linear-gradient(135deg,#fd79a8,#e84393);}
+
+/* 进度条 */
+.pbar{height:6px;background:#F0F2F7;border-radius:3px;overflow:hidden;}
+.pbar-fill{height:100%;border-radius:3px;}
+.pf-blue{background:linear-gradient(90deg,#3B7EF8,#6C5CE7);}
+.pf-green{background:linear-gradient(90deg,#00C48C,#00B09B);}
+.pf-orange{background:linear-gradient(90deg,#FF8C42,#FF6B6B);}
+
+/* 表格 */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:10px 14px;text-align:left;font-size:12px;font-weight:600;color:#8a94a8;background:#F7F8FC;border-bottom:1px solid #eaecf2;white-space:nowrap;}
+tbody tr{border-bottom:1px solid #F0F2F7;transition:background .12s;}
+tbody tr:hover{background:#F7F8FC;}
+tbody td{padding:11px 14px;font-size:13px;vertical-align:middle;}
+tbody tr:last-child{border-bottom:none;}
+
+/* 筛选 */
+.fbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.flabel{font-size:13px;color:#8a94a8;white-space:nowrap;}
+.fselect{height:32px;padding:0 8px;border:1px solid #eaecf2;border-radius:8px;font-size:13px;color:#1a2035;background:#fff;cursor:pointer;outline:none;}
+.fselect:focus{border-color:#3B7EF8;}
+.ftag{padding:4px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid #eaecf2;background:#fff;color:#8a94a8;transition:all .15s;user-select:none;}
+.ftag.active{background:#3B7EF8;border-color:#3B7EF8;color:#fff;}
+.fspace{flex:1;}
+
+/* 分页 */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid #F0F2F7;margin-top:4px;}
+.pg-info{font-size:12px;color:#8a94a8;}
+.pg-btns{display:flex;gap:4px;}
+.pg-btn{width:30px;height:30px;border:1px solid #eaecf2;background:#fff;border-radius:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.pg-btn:hover{border-color:#3B7EF8;color:#3B7EF8;}
+.pg-btn.active{background:#3B7EF8;border-color:#3B7EF8;color:#fff;}
+
+/* 学生卡片 */
+.student-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.sc{background:#fff;border-radius:14px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer;transition:all .2s;border:2px solid transparent;}
+.sc:hover{box-shadow:0 4px 16px rgba(59,126,248,.14);border-color:#3B7EF8;transform:translateY(-2px);}
+.sc-head{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.sc-name{font-size:15px;font-weight:700;}
+.sc-meta{font-size:12px;color:#8a94a8;margin-top:3px;}
+.sc-score-num{font-size:22px;font-weight:800;color:#3B7EF8;}
+.sc-score-lbl{font-size:11px;color:#8a94a8;}
+.sc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.sc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;}
+.sc-stat{text-align:center;padding:8px 4px;background:#F7F8FC;border-radius:8px;}
+.sc-stat-num{font-size:14px;font-weight:700;}
+.sc-stat-lbl{font-size:10px;color:#8a94a8;margin-top:2px;}
+.sc-actions{display:flex;gap:8px;}
+.sc-actions .btn{flex:1;justify-content:center;}
+
+/* 职位卡片 */
+.job-card{background:#fff;border-radius:14px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:12px;border-left:4px solid transparent;transition:all .18s;}
+.job-card:hover{border-left-color:#3B7EF8;}
+.jc-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;}
+.jc-icon{width:42px;height:42px;border-radius:10px;background:#EBF2FF;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.jc-title{font-size:15px;font-weight:700;}
+.jc-meta{font-size:12px;color:#8a94a8;margin-top:3px;}
+.jc-salary{font-size:14px;font-weight:700;color:#FF8C42;white-space:nowrap;}
+.jc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.jc-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.jc-stats{display:flex;gap:14px;flex-wrap:wrap;}
+.jc-stat{font-size:12px;color:#8a94a8;}
+.jc-stat strong{color:#1a2035;}
+
+/* 通知 */
+.notif-item{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid #F0F2F7;}
+.notif-item:last-child{border-bottom:none;}
+.ni-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.ni-title{font-size:13px;font-weight:600;}
+.ni-sub{font-size:12px;color:#8a94a8;margin-top:3px;}
+.ni-time{font-size:11px;color:#b0b8c9;}
+.ni-dot{width:8px;height:8px;background:#FF4757;border-radius:50%;margin-top:5px;flex-shrink:0;}
+
+/* 表单 */
+.form-group{margin-bottom:14px;}
+.form-label{font-size:13px;font-weight:600;color:#1a2035;margin-bottom:5px;display:block;}
+.form-input{width:100%;height:36px;padding:0 12px;border:1px solid #eaecf2;border-radius:8px;font-size:13px;color:#1a2035;outline:none;transition:border-color .15s;}
+.form-input:focus{border-color:#3B7EF8;}
+.form-textarea{width:100%;padding:10px 12px;border:1px solid #eaecf2;border-radius:8px;font-size:13px;color:#1a2035;outline:none;resize:vertical;min-height:72px;}
+.form-textarea:focus{border-color:#3B7EF8;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-select{width:100%;height:36px;padding:0 10px;border:1px solid #eaecf2;border-radius:8px;font-size:13px;color:#1a2035;background:#fff;outline:none;}
+.form-select:focus{border-color:#3B7EF8;}
+
+/* 院校列表 */
+.school-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid #eaecf2;border-radius:10px;cursor:pointer;transition:all .15s;margin-bottom:8px;}
+.school-item:hover,.school-item.active{border-color:#3B7EF8;background:#F7FBFF;}
+.school-icon-w{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#3B7EF8,#6C5CE7);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.school-name{font-size:13px;font-weight:700;}
+.school-meta{font-size:12px;color:#8a94a8;margin-top:2px;}
+.school-cnt{font-size:20px;font-weight:800;color:#3B7EF8;text-align:right;}
+.school-cnt-lbl{font-size:11px;color:#8a94a8;text-align:right;}
+
+/* 抽屉 */
+.drawer-mask{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;}
+.drawer-mask.open{opacity:1;pointer-events:all;}
+.drawer{position:fixed;top:0;right:-660px;width:660px;height:100vh;background:#fff;z-index:201;box-shadow:-4px 0 24px rgba(0,0,0,.12);transition:right .25s ease;display:flex;flex-direction:column;overflow:hidden;}
+.drawer.open{right:0;}
+.drawer-hd{padding:18px 24px;border-bottom:1px solid #eaecf2;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.drawer-title{font-size:16px;font-weight:700;flex:1;}
+.drawer-close{width:30px;height:30px;border:none;background:#F0F2F7;border-radius:8px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.drawer-body{flex:1;overflow-y:auto;padding:24px;}
+
+/* 时间线 */
+.timeline{padding-left:16px;border-left:2px solid #eaecf2;}
+.tl-item{position:relative;margin-bottom:13px;padding-left:12px;}
+.tl-item::before{content:'';position:absolute;left:-20px;top:5px;width:10px;height:10px;border-radius:50%;background:#3B7EF8;border:2px solid #fff;box-shadow:0 0 0 2px #3B7EF8;}
+.tl-time{font-size:11px;color:#b0b8c9;margin-bottom:2px;}
+.tl-text{font-size:13px;color:#1a2035;}
+
+/* 模态框 */
+.modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:none;align-items:center;justify-content:center;}
+.modal-mask.open{display:flex;}
+.modal{background:#fff;border-radius:16px;width:480px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.18);}
+.modal-hd{padding:18px 24px;border-bottom:1px solid #eaecf2;display:flex;align-items:center;}
+.modal-title{font-size:15px;font-weight:700;flex:1;}
+.modal-close-btn{width:28px;height:28px;border:none;background:#F0F2F7;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.modal-body{padding:24px;}
+.modal-ft{padding:14px 24px;border-top:1px solid #eaecf2;display:flex;justify-content:flex-end;gap:10px;}
+
+/* 柱状图 */
+.bar-chart{display:flex;align-items:flex-end;gap:10px;}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.bar-val{font-size:11px;font-weight:700;color:#1a2035;}
+.bar-body{width:100%;border-radius:4px 4px 0 0;}
+.bar-lbl{font-size:11px;color:#8a94a8;}
+
+/* Toast */
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(16px);background:#1a2035;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transition:all .2s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:1200px){.stat-grid{grid-template-columns:repeat(2,1fr);}.student-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:860px){.sidebar{width:64px;min-width:64px;}.sb-logo-text,.si-label,.si-badge,.sb-section,.sb-cname,.sb-cplan{display:none;}.student-grid{grid-template-columns:1fr;}.stat-grid{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo" id="btn-toggle-sidebar">
+      <div class="sb-logo-icon">🏨</div>
+      <div class="sb-logo-text">AI教学知识库<small>企业招聘端</small></div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section">工作台</div>
+      <button class="sb-item active" data-page="dashboard"><span class="si-icon">📊</span><span class="si-label">数据概览</span></button>
+      <div class="sb-section">人才库</div>
+      <button class="sb-item" data-page="talent"><span class="si-icon">🎓</span><span class="si-label">学生画像库</span></button>
+      <button class="sb-item" data-page="schools"><span class="si-icon">🏫</span><span class="si-label">院校数据</span></button>
+      <div class="sb-section">招聘管理</div>
+      <button class="sb-item" data-page="jobs"><span class="si-icon">📋</span><span class="si-label">职位管理</span></button>
+      <button class="sb-item" data-page="applications"><span class="si-icon">📨</span><span class="si-label">投递管理</span><span class="si-badge" id="badge-app">12</span></button>
+      <button class="sb-item" data-page="interview"><span class="si-icon">🗓️</span><span class="si-label">面试安排</span></button>
+      <div class="sb-section">账号</div>
+      <button class="sb-item" data-page="notify"><span class="si-icon">🔔</span><span class="si-label">消息通知</span><span class="si-badge" id="badge-notify">3</span></button>
+      <button class="sb-item" data-page="settings"><span class="si-icon">⚙️</span><span class="si-label">企业设置</span></button>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-company">
+        <div class="sb-av">万</div>
+        <div><div class="sb-cname">万豪国际集团</div><div class="sb-cplan">✨ 旗舰版会员</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="tb-toggle" id="btn-toggle-sidebar2">☰</button>
+      <span class="tb-title" id="tb-title">数据概览</span>
+      <span class="tb-sub" id="tb-sub">/ 工作台</span>
+      <div class="tb-spacer"></div>
+      <div class="tb-search"><span>🔍</span><input type="text" placeholder="搜索学生、院校、职位…"></div>
+      <button class="tb-btn" data-page="notify">🔔<span class="tb-dot" id="tb-dot"></span></button>
+      <div class="tb-uav">王</div>
+    </header>
+
+    <div class="content">
+      <!-- 数据概览 -->
+      <div class="page active" id="page-dashboard">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-icon si-blue">🎓</div><div><div class="stat-num">3,847</div><div class="stat-label">平台在库学生总数</div><div class="stat-trend t-up">↑ 较上月 +286</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-green">📨</div><div><div class="stat-num">128</div><div class="stat-label">本月收到投递</div><div class="stat-trend t-up">↑ 较上月 +34</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-orange">📋</div><div><div class="stat-num">6</div><div class="stat-label">在招职位数量</div><div class="stat-trend t-up">↑ 新增 2 个</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-purple">✅</div><div><div class="stat-num">23</div><div class="stat-label">本月录用人数</div><div class="stat-trend t-up">↑ 较上月 +8</div></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;">
+                    <div class="card">
+            <div class="card-title">📈 近6个月投递趋势</div>
+            <div class="bar-chart" style="height:150px;padding-bottom:4px;">
+              <div class="bar-col"><div class="bar-val">68</div><div class="bar-body" style="height:68px;background:linear-gradient(180deg,#3B7EF8,#6C5CE7);opacity:.7;"></div><div class="bar-lbl">11月</div></div>
+              <div class="bar-col"><div class="bar-val">82</div><div class="bar-body" style="height:82px;background:linear-gradient(180deg,#3B7EF8,#6C5CE7);"></div><div class="bar-lbl">12月</div></div>
+              <div class="bar-col"><div class="bar-val">55</div><div class="bar-body" style="height:55px;background:linear-gradient(180deg,#3B7EF8,#6C5CE7);opacity:.6;"></div><div class="bar-lbl">1月</div></div>
+              <div class="bar-col"><div class="bar-val">94</div><div class="bar-body" style="height:94px;background:linear-gradient(180deg,#3B7EF8,#6C5CE7);"></div><div class="bar-lbl">2月</div></div>
+              <div class="bar-col"><div class="bar-val">110</div><div class="bar-body" style="height:110px;background:linear-gradient(180deg,#3B7EF8,#6C5CE7);"></div><div class="bar-lbl">3月</div></div>
+              <div class="bar-col"><div class="bar-val">128</div><div class="bar-body" style="height:128px;background:linear-gradient(180deg,#FF8C42,#FF6B6B);"></div><div class="bar-lbl">4月</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">📊 职位投递分布</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>前台接待</span><strong>38</strong></div><div class="pbar"><div class="pbar-fill pf-blue" style="width:78%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>客房服务</span><strong>29</strong></div><div class="pbar"><div class="pbar-fill pf-green" style="width:60%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>餐饮运营</span><strong>24</strong></div><div class="pbar"><div class="pbar-fill pf-orange" style="width:49%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>大堂管理</span><strong>18</strong></div><div class="pbar"><div class="pbar-fill pf-blue" style="width:37%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>宴会策划</span><strong>12</strong></div><div class="pbar"><div class="pbar-fill pf-orange" style="width:25%"></div></div></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="card">
+            <div class="card-title">📨 最新投递 <span class="ct-sub">今日12份</span><div class="ct-space"></div><button class="btn btn-ghost btn-sm" data-page="applications">查看全部</button></div>
+            <div class="notif-item"><div class="av av-blue">陈</div><div style="flex:1;"><div class="ni-title">陈晓雨 · 投递「前台接待专员」</div><div class="ni-sub">浙江旅游职业学院 · 综合评分 92</div><div class="ni-time" style="margin-top:3px;">10分钟前</div></div><div class="ni-dot"></div></div>
+            <div class="notif-item"><div class="av av-green">林</div><div style="flex:1;"><div class="ni-title">林思远 · 投递「客房服务员」</div><div class="ni-sub">上海旅游高等专科学校 · 综合评分 87</div><div class="ni-time" style="margin-top:3px;">32分钟前</div></div><div class="ni-dot"></div></div>
+            <div class="notif-item"><div class="av av-orange">王</div><div style="flex:1;"><div class="ni-title">王梦琪 · 投递「餐饮运营助理」</div><div class="ni-sub">广州番禺职业技术学院 · 综合评分 85</div><div class="ni-time" style="margin-top:3px;">1小时前</div></div></div>
+            <div class="notif-item"><div class="av av-purple">张</div><div style="flex:1;"><div class="ni-title">张浩然 · 投递「大堂副理」</div><div class="ni-sub">北京联合大学 · 综合评分 90</div><div class="ni-time" style="margin-top:3px;">2小时前</div></div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">🏆 人才综合评分分布</div>
+            <div class="bar-chart" style="height:130px;">
+              <div class="bar-col"><div class="bar-val">124</div><div class="bar-body" style="height:38px;background:linear-gradient(180deg,#FF4757,#ff6b81);"></div><div class="bar-lbl">60-70</div></div>
+              <div class="bar-col"><div class="bar-val">389</div><div class="bar-body" style="height:68px;background:linear-gradient(180deg,#FF8C42,#FFB800);"></div><div class="bar-lbl">70-80</div></div>
+              <div class="bar-col"><div class="bar-val">1,203</div><div class="bar-body" style="height:110px;background:linear-gradient(180deg,#3B7EF8,#6C5CE7);"></div><div class="bar-lbl">80-90</div></div>
+              <div class="bar-col"><div class="bar-val">856</div><div class="bar-body" style="height:88px;background:linear-gradient(180deg,#00C48C,#00B09B);"></div><div class="bar-lbl">90-95</div></div>
+              <div class="bar-col"><div class="bar-val">275</div><div class="bar-body" style="height:52px;background:linear-gradient(180deg,#FFB800,#FF8C42);"></div><div class="bar-lbl">95+</div></div>
+            </div>
+            <div style="display:flex;justify-content:space-around;margin-top:14px;padding-top:12px;border-top:1px solid #F0F2F7;">
+              <div style="text-align:center;"><div style="font-size:20px;font-weight:800;color:#3B7EF8;">86.4</div><div style="font-size:11px;color:#8a94a8;margin-top:2px;">平均综合评分</div></div>
+              <div style="text-align:center;"><div style="font-size:20px;font-weight:800;color:#00C48C;">91.2%</div><div style="font-size:11px;color:#8a94a8;margin-top:2px;">评分≥80占比</div></div>
+              <div style="text-align:center;"><div style="font-size:20px;font-weight:800;color:#FF8C42;">275</div><div style="font-size:11px;color:#8a94a8;margin-top:2px;">优秀人才(95+)</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 学生画像库 -->
+      <div class="page" id="page-talent">
+        <div class="card" style="padding:14px 20px;">
+          <div class="fbar" style="margin-bottom:10px;">
+            <span class="flabel">院校：</span>
+            <select class="fselect"><option>全部院校</option><option>浙江旅游职业学院</option><option>上海旅游高等专科学校</option><option>北京联合大学</option><option>广州番禺职业技术学院</option><option>成都职业技术学院</option></select>
+            <span class="flabel">学历：</span>
+            <select class="fselect"><option>全部学历</option><option>本科</option><option>专科</option></select>
+            <span class="flabel">评分：</span>
+            <select class="fselect"><option>不限</option><option>95分以上</option><option>90-95分</option><option>80-90分</option></select>
+            <div class="fspace"></div>
+            <button class="btn btn-primary btn-sm" id="btn-filter">🔍 筛选</button>
+            <button class="btn btn-ghost btn-sm" id="btn-reset">重置</button>
+            <button class="btn btn-ghost btn-sm" id="btn-view-grid">⊞ 卡片</button>
+            <button class="btn btn-ghost btn-sm" id="btn-view-list">☰ 列表</button>
+          </div>
+          <div class="fbar">
+            <span class="flabel">能力标签：</span>
+            <span class="ftag active">全部</span>
+            <span class="ftag">沟通能力强</span>
+            <span class="ftag">服务意识优</span>
+            <span class="ftag">英语熟练</span>
+            <span class="ftag">实训优秀</span>
+            <span class="ftag">学习活跃</span>
+            <div class="fspace"></div>
+            <span style="font-size:12px;color:#8a94a8;">共 <strong style="color:#3B7EF8;">3,847</strong> 名学生</span>
+          </div>
+        </div>
+        <div id="view-grid">
+          <div class="student-grid">
+            <div class="sc" data-student="陈晓雨|浙江旅游职业学院|酒店管理专科·大三|92|96%|88分|42次|av-blue|沟通能力强,服务意识优,英语熟练,实训优秀">
+              <div class="sc-head"><div class="av av-lg av-blue">陈</div><div style="flex:1;"><div class="sc-name">陈晓雨</div><div class="sc-meta">浙江旅游职业学院 · 酒店管理专科 · 大三</div></div><div style="text-align:right;"><div class="sc-score-num">92</div><div class="sc-score-lbl">综合评分</div></div></div>
+              <div class="sc-tags"><span class="tag tag-blue">沟通能力强</span><span class="tag tag-green">服务意识优</span><span class="tag tag-orange">英语熟练</span><span class="tag tag-purple">实训优秀</span></div>
+              <div class="sc-stats"><div class="sc-stat"><div class="sc-stat-num">96%</div><div class="sc-stat-lbl">课程完成率</div></div><div class="sc-stat"><div class="sc-stat-num">88分</div><div class="sc-stat-lbl">平均答题</div></div><div class="sc-stat"><div class="sc-stat-num">42次</div><div class="sc-stat-lbl">AI训练</div></div></div>
+              <div class="sc-actions"><button class="btn btn-outline btn-sm btn-view-profile">查看画像</button><button class="btn btn-primary btn-sm btn-invite">邀请投递</button></div>
+            </div>
+            <div class="sc" data-student="林思远|上海旅游高等专科学校|酒店管理专科·大三|87|89%|85分|35次|av-green|学习活跃,答题高分,实训优秀">
+              <div class="sc-head"><div class="av av-lg av-green">林</div><div style="flex:1;"><div class="sc-name">林思远</div><div class="sc-meta">上海旅游高等专科学校 · 酒店管理专科 · 大三</div></div><div style="text-align:right;"><div class="sc-score-num">87</div><div class="sc-score-lbl">综合评分</div></div></div>
+              <div class="sc-tags"><span class="tag tag-green">学习活跃</span><span class="tag tag-blue">答题高分</span><span class="tag tag-purple">实训优秀</span></div>
+              <div class="sc-stats"><div class="sc-stat"><div class="sc-stat-num">89%</div><div class="sc-stat-lbl">课程完成率</div></div><div class="sc-stat"><div class="sc-stat-num">85分</div><div class="sc-stat-lbl">平均答题</div></div><div class="sc-stat"><div class="sc-stat-num">35次</div><div class="sc-stat-lbl">AI训练</div></div></div>
+              <div class="sc-actions"><button class="btn btn-outline btn-sm btn-view-profile">查看画像</button><button class="btn btn-primary btn-sm btn-invite">邀请投递</button></div>
+            </div>
+            <div class="sc" data-student="王梦琪|广州番禺职业技术学院|旅游管理专科·大二|85|82%|83分|28次|av-orange|服务意识优,沟通能力强">
+              <div class="sc-head"><div class="av av-lg av-orange">王</div><div style="flex:1;"><div class="sc-name">王梦琪</div><div class="sc-meta">广州番禺职业技术学院 · 旅游管理专科 · 大二</div></div><div style="text-align:right;"><div class="sc-score-num">85</div><div class="sc-score-lbl">综合评分</div></div></div>
+              <div class="sc-tags"><span class="tag tag-orange">服务意识优</span><span class="tag tag-blue">沟通能力强</span></div>
+              <div class="sc-stats"><div class="sc-stat"><div class="sc-stat-num">82%</div><div class="sc-stat-lbl">课程完成率</div></div><div class="sc-stat"><div class="sc-stat-num">83分</div><div class="sc-stat-lbl">平均答题</div></div><div class="sc-stat"><div class="sc-stat-num">28次</div><div class="sc-stat-lbl">AI训练</div></div></div>
+              <div class="sc-actions"><button class="btn btn-outline btn-sm btn-view-profile">查看画像</button><button class="btn btn-primary btn-sm btn-invite">邀请投递</button></div>
+            </div>
+            <div class="sc" data-student="张浩然|北京联合大学|酒店管理本科·大四|90|94%|91分|50次|av-purple|本科学历,英语熟练,答题高分,学习活跃">
+              <div class="sc-head"><div class="av av-lg av-purple">张</div><div style="flex:1;"><div class="sc-name">张浩然</div><div class="sc-meta">北京联合大学 · 酒店管理本科 · 大四</div></div><div style="text-align:right;"><div class="sc-score-num">90</div><div class="sc-score-lbl">综合评分</div></div></div>
+              <div class="sc-tags"><span class="tag tag-purple">本科学历</span><span class="tag tag-blue">英语熟练</span><span class="tag tag-green">答题高分</span></div>
+              <div class="sc-stats"><div class="sc-stat"><div class="sc-stat-num">94%</div><div class="sc-stat-lbl">课程完成率</div></div><div class="sc-stat"><div class="sc-stat-num">91分</div><div class="sc-stat-lbl">平均答题</div></div><div class="sc-stat"><div class="sc-stat-num">50次</div><div class="sc-stat-lbl">AI训练</div></div></div>
+              <div class="sc-actions"><button class="btn btn-outline btn-sm btn-view-profile">查看画像</button><button class="btn btn-primary btn-sm btn-invite">邀请投递</button></div>
+            </div>
+            <div class="sc" data-student="刘雅婷|成都职业技术学院|酒店管理专科·大三|88|91%|86分|38次|av-pink|服务意识优,实训优秀,学习活跃">
+              <div class="sc-head"><div class="av av-lg av-pink">刘</div><div style="flex:1;"><div class="sc-name">刘雅婷</div><div class="sc-meta">成都职业技术学院 · 酒店管理专科 · 大三</div></div><div style="text-align:right;"><div class="sc-score-num">88</div><div class="sc-score-lbl">综合评分</div></div></div>
+              <div class="sc-tags"><span class="tag tag-green">服务意识优</span><span class="tag tag-blue">实训优秀</span><span class="tag tag-purple">学习活跃</span></div>
+              <div class="sc-stats"><div class="sc-stat"><div class="sc-stat-num">91%</div><div class="sc-stat-lbl">课程完成率</div></div><div class="sc-stat"><div class="sc-stat-num">86分</div><div class="sc-stat-lbl">平均答题</div></div><div class="sc-stat"><div class="sc-stat-num">38次</div><div class="sc-stat-lbl">AI训练</div></div></div>
+              <div class="sc-actions"><button class="btn btn-outline btn-sm btn-view-profile">查看画像</button><button class="btn btn-primary btn-sm btn-invite">邀请投递</button></div>
+            </div>
+            <div class="sc" data-student="赵子轩|浙江旅游职业学院|餐饮管理专科·大三|83|78%|80分|22次|av-blue|餐饮方向,沟通能力强">
+              <div class="sc-head"><div class="av av-lg av-blue">赵</div><div style="flex:1;"><div class="sc-name">赵子轩</div><div class="sc-meta">浙江旅游职业学院 · 餐饮管理专科 · 大三</div></div><div style="text-align:right;"><div class="sc-score-num">83</div><div class="sc-score-lbl">综合评分</div></div></div>
+              <div class="sc-tags"><span class="tag tag-orange">餐饮方向</span><span class="tag tag-blue">沟通能力强</span></div>
+              <div class="sc-stats"><div class="sc-stat"><div class="sc-stat-num">78%</div><div class="sc-stat-lbl">课程完成率</div></div><div class="sc-stat"><div class="sc-stat-num">80分</div><div class="sc-stat-lbl">平均答题</div></div><div class="sc-stat"><div class="sc-stat-num">22次</div><div class="sc-stat-lbl">AI训练</div></div></div>
+              <div class="sc-actions"><button class="btn btn-outline btn-sm btn-view-profile">查看画像</button><button class="btn btn-primary btn-sm btn-invite">邀请投递</button></div>
+            </div>
+          </div>
+          <div class="pagination" style="margin-top:16px;background:#fff;padding:12px 20px;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+            <div class="pg-info">共 3,847 名学生，每页 6 名</div>
+            <div class="pg-btns"><button class="pg-btn">«</button><button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn">3</button><span style="line-height:30px;padding:0 4px;color:#8a94a8;">…</span><button class="pg-btn">642</button><button class="pg-btn">»</button></div>
+          </div>
+        </div>
+        <div id="view-list" style="display:none;">
+          <div class="card">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th><input type="checkbox"></th><th>学生</th><th>院校</th><th>学历/专业</th><th>综合评分</th><th>课程完成</th><th>答题均分</th><th>AI训练</th><th>操作</th></tr></thead>
+                <tbody>
+                  <tr><td><input type="checkbox"></td><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-blue">陈</div><strong>陈晓雨</strong></div></td><td>浙江旅游职业学院</td><td>专科·酒店管理</td><td><strong style="color:#3B7EF8;font-size:15px;">92</strong></td><td>96%</td><td>88分</td><td>42次</td><td><div style="display:flex;gap:4px;"><button class="btn btn-outline btn-xs btn-view-profile" data-student="陈晓雨|浙江旅游职业学院|酒店管理专科·大三|92|96%|88分|42次|av-blue|沟通能力强,服务意识优">画像</button><button class="btn btn-primary btn-xs btn-invite" data-name="陈晓雨">邀请</button></div></td></tr>
+                  <tr><td><input type="checkbox"></td><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-green">林</div><strong>林思远</strong></div></td><td>上海旅游高等专科学校</td><td>专科·酒店管理</td><td><strong style="color:#3B7EF8;font-size:15px;">87</strong></td><td>89%</td><td>85分</td><td>35次</td><td><div style="display:flex;gap:4px;"><button class="btn btn-outline btn-xs btn-view-profile" data-student="林思远|上海旅游高等专科学校|酒店管理专科·大三|87|89%|85分|35次|av-green|学习活跃,答题高分">画像</button><button class="btn btn-primary btn-xs btn-invite" data-name="林思远">邀请</button></div></td></tr>
+                  <tr><td><input type="checkbox"></td><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-purple">张</div><strong>张浩然</strong></div></td><td>北京联合大学</td><td>本科·酒店管理</td><td><strong style="color:#3B7EF8;font-size:15px;">90</strong></td><td>94%</td><td>91分</td><td>50次</td><td><div style="display:flex;gap:4px;"><button class="btn btn-outline btn-xs btn-view-profile" data-student="张浩然|北京联合大学|酒店管理本科·大四|90|94%|91分|50次|av-purple|本科学历,英语熟练">画像</button><button class="btn btn-primary btn-xs btn-invite" data-name="张浩然">邀请</button></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 院校数据 -->
+      <div class="page" id="page-schools">
+        <div style="display:grid;grid-template-columns:280px 1fr;gap:16px;">
+          <div class="card" style="margin-bottom:0;">
+            <div class="card-title">🏫 合作院校 <span class="ct-sub">共6所</span></div>
+            <div class="school-item active" data-school="浙江旅游职业学院|专科|486|87.2|96%|酒店管理"><div class="school-icon-w">🏨</div><div style="flex:1;"><div class="school-name">浙江旅游职业学院</div><div class="school-meta">专科 · 酒店管理</div></div><div><div class="school-cnt">486</div><div class="school-cnt-lbl">学生</div></div></div>
+            <div class="school-item" data-school="上海旅游高等专科学校|专科|412|85.8|93%|酒店管理"><div class="school-icon-w">🌆</div><div style="flex:1;"><div class="school-name">上海旅游高等专科学校</div><div class="school-meta">专科 · 酒店管理</div></div><div><div class="school-cnt">412</div><div class="school-cnt-lbl">学生</div></div></div>
+            <div class="school-item" data-school="北京联合大学|本科|328|89.6|97%|酒店管理"><div class="school-icon-w">🏛️</div><div style="flex:1;"><div class="school-name">北京联合大学</div><div class="school-meta">本科 · 酒店管理</div></div><div><div class="school-cnt">328</div><div class="school-cnt-lbl">学生</div></div></div>
+            <div class="school-item" data-school="广州番禺职业技术学院|专科|375|84.1|91%|旅游管理"><div class="school-icon-w">🌴</div><div style="flex:1;"><div class="school-name">广州番禺职业技术学院</div><div class="school-meta">专科 · 旅游管理</div></div><div><div class="school-cnt">375</div><div class="school-cnt-lbl">学生</div></div></div>
+            <div class="school-item" data-school="成都职业技术学院|专科|290|83.5|89%|酒店管理"><div class="school-icon-w">🐼</div><div style="flex:1;"><div class="school-name">成都职业技术学院</div><div class="school-meta">专科 · 酒店管理</div></div><div><div class="school-cnt">290</div><div class="school-cnt-lbl">学生</div></div></div>
+            <div class="school-item" data-school="深圳职业技术大学|本科|256|88.3|95%|酒店管理"><div class="school-icon-w">🏙️</div><div style="flex:1;"><div class="school-name">深圳职业技术大学</div><div class="school-meta">本科 · 酒店管理</div></div><div><div class="school-cnt">256</div><div class="school-cnt-lbl">学生</div></div></div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">📊 <span id="sd-name">浙江旅游职业学院</span> · 数据详情</div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;">
+                <div style="text-align:center;padding:14px;background:#F7F8FC;border-radius:10px;"><div style="font-size:22px;font-weight:800;color:#3B7EF8;" id="sd-students">486</div><div style="font-size:11px;color:#8a94a8;margin-top:4px;">在库学生数</div></div>
+                <div style="text-align:center;padding:14px;background:#F7F8FC;border-radius:10px;"><div style="font-size:22px;font-weight:800;color:#00C48C;" id="sd-score">87.2</div><div style="font-size:11px;color:#8a94a8;margin-top:4px;">平均综合评分</div></div>
+                <div style="text-align:center;padding:14px;background:#F7F8FC;border-radius:10px;"><div style="font-size:22px;font-weight:800;color:#FF8C42;" id="sd-active">96%</div><div style="font-size:11px;color:#8a
+94a8;margin-top:4px;">平台活跃率</div></div>
+                <div style="text-align:center;padding:14px;background:#F7F8FC;border-radius:10px;"><div style="font-size:22px;font-weight:800;color:#6C5CE7;" id="sd-type">专科</div><div style="font-size:11px;color:#8a94a8;margin-top:4px;">院校层次</div></div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div>
+                  <div style="font-size:13px;font-weight:700;margin-bottom:10px;">各能力维度平均水平</div>
+                  <div style="display:flex;flex-direction:column;gap:9px;">
+                    <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>服务礼仪</span><strong>91分</strong></div><div class="pbar"><div class="pbar-fill pf-blue" style="width:91%"></div></div></div>
+                    <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>前台接待</span><strong>88分</strong></div><div class="pbar"><div class="pbar-fill pf-green" style="width:88%"></div></div></div>
+                    <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>投诉处理</span><strong>82分</strong></div><div class="pbar"><div class="pbar-fill pf-orange" style="width:82%"></div></div></div>
+                    <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>英语沟通</span><strong>79分</strong></div><div class="pbar"><div class="pbar-fill pf-blue" style="width:79%"></div></div></div>
+                    <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>餐饮服务</span><strong>85分</strong></div><div class="pbar"><div class="pbar-fill pf-green" style="width:85%"></div></div></div>
+                  </div>
+                </div>
+                <div>
+                  <div style="font-size:13px;font-weight:700;margin-bottom:10px;">学习行为数据</div>
+                  <div style="display:flex;flex-direction:column;gap:7px;">
+                    <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#F7F8FC;border-radius:8px;font-size:12px;"><span>人均课程完成率</span><strong>93%</strong></div>
+                    <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#F7F8FC;border-radius:8px;font-size:12px;"><span>人均AI训练次数</span><strong>36次</strong></div>
+                    <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#F7F8FC;border-radius:8px;font-size:12px;"><span>人均答题正确率</span><strong>87%</strong></div>
+                    <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#F7F8FC;border-radius:8px;font-size:12px;"><span>周均学习时长</span><strong>4.2小时</strong></div>
+                    <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#F7F8FC;border-radius:8px;font-size:12px;"><span>人均问答提问次数</span><strong>18次</strong></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card" style="margin-bottom:0;">
+              <div class="card-title">🎓 该院校 Top 5 优秀学生</div>
+              <div class="tbl-wrap">
+                <table>
+                  <thead><tr><th>排名</th><th>学生</th><th>综合评分</th><th>课程完成</th><th>AI训练</th><th>操作</th></tr></thead>
+                  <tbody>
+                    <tr><td>🥇</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-blue">陈</div>陈晓雨</div></td><td><strong style="color:#3B7EF8;">92</strong></td><td>96%</td><td>42次</td><td><button class="btn btn-outline btn-xs btn-view-profile" data-student="陈晓雨|浙江旅游职业学院|酒店管理专科·大三|92|96%|88分|42次|av-blue|沟通能力强,服务意识优">查看画像</button></td></tr>
+                    <tr><td>🥈</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-green">赵</div>赵子轩</div></td><td><strong style="color:#3B7EF8;">89</strong></td><td>91%</td><td>38次</td><td><button class="btn btn-outline btn-xs btn-view-profile" data-student="赵子轩|浙江旅游职业学院|餐饮管理专科·大三|89|91%|86分|38次|av-green|餐饮方向,学习活跃">查看画像</button></td></tr>
+                    <tr><td>🥉</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-orange">孙</div>孙悦</div></td><td><strong style="color:#3B7EF8;">87</strong></td><td>88%</td><td>31次</td><td><button class="btn btn-outline btn-xs btn-view-profile" data-student="孙悦|浙江旅游职业学院|酒店管理专科·大三|87|88%|84分|31次|av-orange|服务意识优">查看画像</button></td></tr>
+                    <tr><td>4</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-pink">何</div>何静</div></td><td><strong style="color:#3B7EF8;">85</strong></td><td>85%</td><td>27次</td><td><button class="btn btn-outline btn-xs btn-view-profile" data-student="何静|浙江旅游职业学院|酒店管理专科·大二|85|85%|82分|27次|av-pink|沟通能力强">查看画像</button></td></tr>
+                    <tr><td>5</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-purple">吴</div>吴磊</div></td><td><strong style="color:#3B7EF8;">84</strong></td><td>83%</td><td>24次</td><td><button class="btn btn-outline btn-xs btn-view-profile" data-student="吴磊|浙江旅游职业学院|酒店管理专科·大三|84|83%|81分|24次|av-purple|学习活跃">查看画像</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 职位管理 -->
+      <div class="page" id="page-jobs">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <span style="font-size:13px;color:#8a94a8;">共 <strong style="color:#1a2035;">6</strong> 个职位</span>
+          <button class="btn btn-primary" id="btn-open-job-modal">＋ 发布新职位</button>
+        </div>
+        <div class="job-card"><div class="jc-head"><div class="jc-icon">🏨</div><div style="flex:1;"><div class="jc-title">前台接待专员</div><div class="jc-meta">万豪国际集团 · 上海浦东 · 全职</div></div><div class="jc-salary">6,000-8,000元/月</div></div><div class="jc-tags"><span class="tag tag-blue">酒店管理</span><span class="tag tag-green">英语熟练</span><span class="tag tag-orange">服务意识</span><span class="tag tag-gray">大专及以上</span></div><div class="jc-foot"><div class="jc-stats"><span class="jc-stat">投递：<strong>38</strong></span><span class="jc-stat">待处理：<strong style="color:#FF4757;">12</strong></span><span class="jc-stat">面试中：<strong style="color:#FF8C42;">8</strong></span><span class="jc-stat">已录用：<strong style="color:#00C48C;">5</strong></span></div><div style="display:flex;gap:8px;align-items:center;"><span class="tag tag-green">招聘中</span><button class="btn btn-ghost btn-sm" id="btn-edit-job1">编辑</button><button class="btn btn-primary btn-sm" data-page="applications">查看投递</button></div></div></div>
+        <div class="job-card"><div class="jc-head"><div class="jc-icon">🛏️</div><div style="flex:1;"><div class="jc-title">客房服务员</div><div class="jc-meta">万豪国际集团 · 北京朝阳 · 全职</div></div><div class="jc-salary">5,500-7,000元/月</div></div><div class="jc-tags"><span class="tag tag-blue">酒店管理</span><span class="tag tag-orange">服务意识</span><span class="tag tag-gray">大专及以上</span></div><div class="jc-foot"><div class="jc-stats"><span class="jc-stat">投递：<strong>29</strong></span><span class="jc-stat">待处理：<strong style="color:#FF4757;">7</strong></span><span class="jc-stat">面试中：<strong style="color:#FF8C42;">5</strong></span><span class="jc-stat">已录用：<strong style="color:#00C48C;">4</strong></span></div><div style="display:flex;gap:8px;align-items:center;"><span class="tag tag-green">招聘中</span><button class="btn btn-ghost btn-sm" id="btn-edit-job2">编辑</button><button class="btn btn-primary btn-sm" data-page="applications">查看投递</button></div></div></div>
+        <div class="job-card"><div class="jc-head"><div class="jc-icon">🍽️</div><div style="flex:1;"><div class="jc-title">餐饮运营助理</div><div class="jc-meta">万豪国际集团 · 广州天河 · 全职</div></div><div class="jc-salary">5,800-7,500元/月</div></div><div class="jc-tags"><span class="tag tag-orange">餐饮管理</span><span class="tag tag-blue">沟通能力</span><span class="tag tag-gray">大专及以上</span></div><div class="jc-foot"><div class="jc-stats"><span class="jc-stat">投递：<strong>24</strong></span><span class="jc-stat">待处理：<strong style="color:#FF4757;">6</strong></span><span class="jc-stat">面试中：<strong style="color:#FF8C42;">4</strong></span><span class="jc-stat">已录用：<strong style="color:#00C48C;">3</strong></span></div><div style="display:flex;gap:8px;align-items:center;"><span class="tag tag-green">招聘中</span><button class="btn btn-ghost btn-sm">编辑</button><button class="btn btn-primary btn-sm" data-page="applications">查看投递</button></div></div></div>
+        <div class="job-card"><div class="jc-head"><div class="jc-icon">🏅</div><div style="flex:1;"><div class="jc-title">大堂副理</div><div class="jc-meta">万豪国际集团 · 成都锦江 · 全职 · 本科优先</div></div><div class="jc-salary">7,000-9,500元/月</div></div><div class="jc-tags"><span class="tag tag-purple">本科优先</span><span class="tag tag-blue">英语熟练</span><span class="tag tag-green">管理能力</span></div><div class="jc-foot"><div class="jc-stats"><span class="jc-stat">投递：<strong>18</strong></span><span class="jc-stat">待处理：<strong style="color:#FF4757;">4</strong></span><span class="jc-stat">面试中：<strong style="color:#FF8C42;">3</strong></span><span class="jc-stat">已录用：<strong style="color:#00C48C;">2</strong></span></div><div style="display:flex;gap:8px;align-items:center;"><span class="tag tag-green">招聘中</span><button class="btn btn-ghost btn-sm">编辑</button><button class="btn btn-primary btn-sm" data-page="applications">查看投递</button></div></div></div>
+        <div class="job-card" style="opacity:.65;"><div class="jc-head"><div class="jc-icon">🎊</div><div style="flex:1;"><div class="jc-title">宴会策划助理</div><div class="jc-meta">万豪国际集团 · 杭州西湖 · 已关闭</div></div><div class="jc-salary">5,500-7,000元/月</div></div><div class="jc-tags"><span class="tag tag-orange">宴会管理</span><span class="tag tag-gray">大专及以上</span></div><div class="jc-foot"><div class="jc-stats"><span class="jc-stat">共投递：<strong>12</strong></span><span class="jc-stat">已录用：<strong style="color:#00C48C;">6</strong></span></div><div style="display:flex;gap:8px;align-items:center;"><span class="tag tag-gray">已关闭</span><button class="btn btn-ghost btn-sm" id="btn-reopen-job">重新开放</button></div></div></div>
+      </div>
+
+      <!-- 投递管理 -->
+      <div class="page" id="page-applications">
+        <div class="card" style="padding:14px 20px;margin-bottom:16px;">
+          <div class="fbar">
+            <span class="flabel">职位：</span>
+            <select class="fselect"><option>全部职位</option><option>前台接待专员</option><option>客房服务员</option><option>餐饮运营助理</option><option>大堂副理</option></select>
+            <span class="flabel">状态：</span>
+            <span class="ftag active">全部</span><span class="ftag">待处理</span><span class="ftag">面试中</span><span class="ftag">已录用</span><span class="ftag">已拒绝</span>
+            <div class="fspace"></div>
+            <button class="btn btn-ghost btn-sm" id="btn-export">⬇ 导出</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th><input type="checkbox"></th><th>投递人</th><th>投递职位</th><th>院校</th><th>综合评分</th><th>投递时间</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td><input type="checkbox"></td><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-blue">陈</div><div><div style="font-weight:600;">陈晓雨</div><div style="font-size:11px;color:#8a94a8;">酒店管理·专科·大三</div></div></div></td><td>前台接待专员</td><td style="font-size:12px;">浙江旅游职业学院</td><td><strong style="color:#3B7EF8;font-size:15px;">92</strong></td><td style="font-size:12px;color:#8a94a8;">10分钟前</td><td><span class="tag tag-red app-status" id="st-1">待处理</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-outline btn-xs btn-view-profile" data-student="陈晓雨|浙江旅游职业学院|酒店管理专科·大三|92|96%|88分|42次|av-blue|沟通能力强,服务意识优">画像</button><button class="btn btn-success btn-xs btn-set-status" data-target="st-1" data-status="面试中" data-cls="tag-orange">邀约面试</button><button class="btn btn-danger btn-xs btn-set-status" data-target="st-1" data-status="已拒绝" data-cls="tag-gray">拒绝</button></div></td></tr>
+                <tr><td><input type="checkbox"></td><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-green">林</div><div><div style="font-weight:600;">林思远</div><div style="font-size:11px;color:#8a94a8;">酒店管理·专科·大三</div></div></div></td><td>客房服务员</td><td style="font-size:12px;">上海旅游高等专科学校</td><td><strong style="color:#3B7EF8;font-size:15px;">87</strong></td><td style="font-size:12px;color:#8a94a8;">32分钟前</td><td><span class="tag tag-red app-status" id="st-2">待处理</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-outline btn-xs btn-view-profile" data-student="林思远|上海旅游高等专科学校|酒店管理专科·大三|87|89%|85分|35次|av-green|学习活跃,答题高分">画像</button><button class="btn btn-success btn-xs btn-set-status" data-target="st-2" data-status="面试中" data-cls="tag-orange">邀约面试</button><button class="btn btn-danger btn-xs btn-set-status" data-target="st-2" data-status="已拒绝" data-cls="tag-gray">拒绝</button></div></td></tr>
+                <tr><td><input type="checkbox"></td><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-purple">张</div><div><div style="font-weight:600;">张浩然</div><div style="font-size:11px;color:#8a94a8;">酒店管理·本科·大四</div></div></div></td><td>大堂副理</td><td style="font-size:12px;">北京联合大学</td><td><strong style="color:#3B7EF8;font-size:15px;">90</strong></td><td style="font-size:12px;color:#8a94a8;">2小时前</td><td><span class="tag tag-orange app-status" id="st-3">面试中</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-outline btn-xs btn-view-profile" data-student="张浩然|北京联合大学|酒店管理本科·大四|90|94%|91分|50次|av-purple|本科学历,英语熟练">画像</button><button class="btn btn-success btn-xs btn-set-status" data-target="st-3" data-status="已录用" data-cls="tag-green">录用</button><button class="btn btn-danger btn-xs btn-set-status" data-target="st-3" data-status="已拒绝" data-cls="tag-gray">拒绝</button></div></td></tr>
+                <tr><td><input type="checkbox"></td><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-orange">王</div><div><div style="font-weight:600;">王梦琪</div><div style="font-size:11px;color:#8a94a8;">旅游管理·专科·大二</div></div></div></td><td>餐饮运营助理</td><td style="font-size:12px;">广州番禺职业技术学院</td><td><strong style="color:#3B7EF8;font-size:15px;">85</strong></td><td style="font-size:12px;color:#8a94a8;">昨天 16:30</td><td><span class="tag tag-blue app-status" id="st-4">已查看</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-outline btn-xs btn-view-profile" data-student="王梦琪|广州番禺职业技术学院|旅游管理专科·大二|85|82%|83分|28次|av-orange|服务意识优,沟通能力强">画像</button><button class="btn btn-success btn-xs btn-set-status" data-target="st-4" data-status="面试中" data-cls="tag-orange">邀约面试</button><button class="btn btn-danger btn-xs btn-set-status" data-target="st-4" data-status="已拒绝" data-cls="tag-gray">拒绝</button></div></td></tr>
+                <tr><td><input type="checkbox"></td><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-pink">刘</div><div><div style="font-weight:600;">刘雅婷</div><div style="font-size:11px;color:#8a94a8;">酒店管理·专科·大三</div></div></div></td><td>前台接待专员</td><td style="font-size:12px;">成都职业技术学院</td><td><strong style="color:#3B7EF8;font-size:15px;">88</strong></td><td style="font-size:12px;color:#8a94a8;">昨天 14:10</td><td><span class="tag tag-green app-status" id="st-5">已录用</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-outline btn-xs btn-view-profile" data-student="刘雅婷|成都职业技术学院|酒店管理专科·大三|88|91%|86分|38次|av-pink|服务意识优,实训优秀">画像</button><button class="btn btn-ghost btn-xs" id="btn-send-offer">发入职通知</button></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination"><div class="pg-info">共 128 条投递记录</div><div class="pg-btns"><button class="pg-btn">«</button><button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn">3</button><span style="line-height:30px;padding:0 4px;color:#8a94a8;">…</span><button class="pg-btn">26</button><button class="pg-btn">»</button></div></div>
+        </div>
+      </div>
+
+      <!-- 面试安排 -->
+      <div class="page" id="page-interview">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="card">
+            <div class="card-title">🗓️ 本周面试日历 <span class="ct-sub">2026年4月第3周</span></div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px;">
+              <div style="text-align:center;padding:10px 4px;background:#F7F8FC;border-radius:8px;font-size:12px;"><div style="color:#8a94a8;">周一</div><div style="font-weight:700;margin-top:2px;">14</div></div>
+              <div style="text-align:center;padding:10px 4px;background:#F7F8FC;border-radius:8px;font-size:12px;"><div style="color:#8a94a8;">周二</div><div style="font-weight:700;margin-top:2px;">15</div><div style="width:6px;height:6px;background:#3B7EF8;border-radius:50%;margin:4px auto 0;"></div></div>
+              <div style="text-align:center;padding:10px 4px;background:#EBF2FF;border-radius:8px;border:2px solid #3B7EF8;font-size:12px;"><div style="color:#3B7EF8;font-weight:700;">周三</div><div style="font-weight:800;color:#3B7EF8;margin-top:2px;">16</div><div style="font-size:10px;color:#3B7EF8;margin-top:2px;">今天</div></div>
+              <div style="text-align:center;padding:10px 4px;background:#F7F8FC;border-radius:8px;font-size:12px;"><div style="color:#8a94a8;">周四</div><div style="font-weight:700;margin-top:2px;">17</div><div style="width:6px;height:6px;background:#FF8C42;border-radius:50%;margin:4px auto 0;"></div></div>
+              <div style="text-align:center;padding:10px 4px;background:#F7F8FC;border-radius:8px;font-size:12px;"><div style="color:#8a94a8;">周五</div><div style="font-weight:700;margin-top:2px;">18</div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="padding:14px;background:#EBF2FF;border-radius:10px;border-left:4px solid #3B7EF8;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;">张浩然 · 大堂副理</span><span class="tag tag-blue">今日 10:00</span></div><div style="font-size:12px;color:#8a94a8;margin-bottom:8px;">北京联合大学 · 综合评分 90 · 视频面试</div><div style="display:flex;gap:6px;"><button class="btn btn-primary btn-sm" id="btn-join-interview">进入面试</button><button class="btn btn-ghost btn-sm" id="btn-send-remind">发送提醒</button><button class="btn btn-ghost btn-sm btn-view-profile" data-student="张浩然|北京联合大学|酒店管理本科·大四|90|94%|91分|50次|av-purple|本科学历,英语熟练">查看画像</button></div></div>
+              <div style="padding:14px;background:#FFF4E8;border-radius:10px;border-left:4px solid #FF8C42;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;">陈晓雨 · 前台接待专员</span><span class="tag tag-orange">明日 14:30</span></div><div style="font-size:12px;color:#8a94a8;margin-bottom:8px;">浙江旅游职业学院 · 综合评分 92 · 线下面试</div><div style="display:flex;gap:6px;"><button class="btn btn-ghost btn-sm btn-view-profile" data-student="陈晓雨|浙江旅游职业学院|酒店管理专科·大三|92|96%|88分|42次|av-blue|沟通能力强,服务意识优">查看画像</button><button class="btn btn-ghost btn-sm" id="btn-reschedule1">申请改期</button></div></div>
+              <div style="padding:14px;background:#F7F8FC;border-radius:10px;border-left:4px solid #eaecf2;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;">林思远 · 客房服务员</span><span class="tag tag-gray">周四 10:00</span></div><div style="font-size:12px;color:#8a94a8;margin-bottom:8px;">上海旅游高等专科学校 · 综合评分 87 · 视频面试</div><div style="display:flex;gap:6px;"><button class="btn btn-ghost btn-sm btn-view-profile" data-student="林思远|上海旅游高等专科学校|酒店管理专科·大三|87|89%|85分|35次|av-green|学习活跃,答题高分">查看画像</button><button class="btn btn-ghost btn-sm" id="btn-reschedule2">申请改期</button></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">➕ 安排新面试</div>
+            <div class="form-group"><label class="form-label">候选人</label><select class="form-select"><option>选择候选人…</option><option>陈晓雨（前台接待专员）</option><option>林思远（客房服务员）</option><option>王梦琪（餐饮运营助理）</option><option>张浩然（大堂副理）</option></select></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">面试日期</label><input type="date" class="form-input" value="2026-04-25"></div>
+              <div class="form-group"><label class="form-label">面试时间</label><input type="time" class="form-input" value="10:00"></div>
+            </div>
+            <div class="form-group"><label class="form-label">面试方式</label><select class="form-select"><option>视频面试</option><option>线下面试</option><option>电话面试</option></select></div>
+            <div class="form-group"><label class="form-label">面试地点 / 会议链接</label><input type="text" class="form-input" placeholder="填写地址或视频会议链接"></div>
+            <div class="form-group"><label class="form-label">面试官</label><input type="text" class="form-input" value="王芳（招聘主管）"></div>
+            <div class="form-group"><label class="form-label">备注</label><textarea class="form-textarea" placeholder="面试注意事项、携带材料等…"></textarea></div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center;" id="btn-confirm-interview">确认安排并通知候选人</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 消息通知 -->
+      <div class="page" id="page-notify">
+        <div class="card">
+          <div class="card-title">🔔 消息通知 <span class="ct-sub" id="notify-unread-label">3 条未读</span><div class="ct-space"></div><button class="btn btn-ghost btn-sm" id="btn-read-all">全部已读</button></div>
+          <div class="notif-item"><div class="ni-icon" style="background:#EBF2FF;">📨</div><div style="flex:1;"><div class="ni-title">新投递提醒</div><div class="ni-sub">陈晓雨 投递了「前台接待专员」，综合评分 92，建议优先查看</div><div class="ni-time" style="margin-top:4px;">10分钟前</div></div><div class="ni-dot"></div></div>
+          <div class="notif-item"><div class="ni-icon" style="background:#E8F8F0;">🎓</div><div style="flex:1;"><div class="ni-title">平台人才推荐</div><div class="ni-sub">系统为您推荐了 5 位高匹配度学生，综合评分均在 90 分以上</div><div class="ni-time" style="margin-top:4px;">1小时前</div></div><div class="ni-dot"></div></div>
+          <div class="notif-item"><div class="ni-icon" style="background:#FFF4E8;">🗓️</div><div style="flex:1;"><div class="ni-title">面试提醒</div><div class="ni-sub">张浩然 的面试将于今日 10:00 开始，请提前准备</div><div class="ni-time" style="margin-top:4px;">2小时前</div></div><div class="ni-dot"></div></div>
+          <div class="notif-item"><div class="ni-icon" style="background:#F0EBFF;">✅</div><div style="flex:1;"><div class="ni-title">录用成功</div><div class="ni-sub">刘雅婷 已接受「前台接待专员」录用邀请，入职日期 2026-05-01</div><div class="ni-time" style="margin-top:4px;">昨天 18:20</div></div></div>
+          <div class="notif-item"><div class="ni-icon" style="background:#F0F2F7;">📋</div><div style="flex:1;"><div class="ni-title">职位即将到期</div><div class="ni-sub">「客房服务员」职位将于 3 天后到期，请及时续期或关闭</div><div class="ni-time" style="margin-top:4px;">昨天 09:00</div></div></div>
+        </div>
+      </div>
+
+      <!-- 企业设置 -->
+      <div class="page" id="page-settings">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="card">
+            <div class="card-title">🏢 企业基本信息</div>
+            <div class="form-group"><label class="form-label">企业名称</label><input class="form-input" value="万豪国际集团（中国区）"></div>
+            <div class="form-group"><label class="form-label">所属行业</label><select class="form-select"><option selected>酒店 / 住宿业</option><option>餐饮业</option><option>旅游业</option></select></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">企业规模</label><select class="form-select"><option selected>10000人以上</option><option>1000-9999人</option><option>500-999人</option></select></div>
+              <div class="form-group"><label class="form-label">所在城市</label><input class="form-input" value="上海市"></div>
+            </div>
+            <div class="form-group"><label class="form-label">企业简介</label><textarea class="form-textarea">万豪国际集团是全球最大的酒店集团之一，在中国拥有超过400家酒店，提供优质的住宿与服务体验。</textarea></div>
+            <div class="form-group"><label class="form-label">官网地址</label><input class="form-input" value="https://www.marriott.com.cn"></div>
+            <button class="btn btn-primary" id="btn-save-settings">保存修改</button>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">👤 HR 账号管理</div>
+              <div class="tbl-wrap"><table><thead><tr><th>姓名</th><th>职位</th><th>权限</th><th>状态</th><th>操作</th></tr></thead><tbody>
+                <tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-orange">王</div>王芳</div></td><td style="font-size:12px;">招聘主管</td><td><span class="tag tag-purple">管理员</span></td><td><span class="tag tag-green">在职</span></td><td><button class="btn btn-ghost btn-xs btn-edit-member">编辑</button></td></tr>
+                <tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-blue">李</div>李明</div></td><td style="font-size:12px;">招聘专员</td><td><span class="tag tag-blue">普通成员</span></td><td><span class="tag tag-green">在职</span></td><td><button class="btn btn-ghost btn-xs btn-edit-member">编辑</button></td></tr>
+                <tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="av av-sm av-green">赵</div>赵敏</div></td><td style="font-size:12px;">招聘专员</td><td><span class="tag tag-blue">普通成员</span></td><td><span class="tag tag-green">在职</span></td><td><button class="btn btn-ghost btn-xs btn-edit-member">编辑</button></td></tr>
+              </tbody></table></div>
+              <button class="btn btn-outline btn-sm" style="margin-top:12px;" id="btn-invite-member">＋ 邀请新成员</button>
+            </div>
+            <div class="card" style="margin-bottom:0;">
+              <div class="card-title">💳 会员套餐</div>
+              <div style="padding:16px;background:linear-gradient(135deg,#1a2035,#2d3a5e);border-radius:12px;color:#fff;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><span style="font-size:20px;">✨</span><div><div style="font-weight:700;font-size:15px;">旗舰版会员</div><div style="font-size:12px;opacity:.7;margin-top:2px;">到期时间：2026-12-31</div></div></div>
+                <div style="display:flex;gap:16px;font-size:12px;opacity:.85;flex-wrap:wrap;"><span>✓ 无限查看学生画像</span><span>✓ 无限发布职位</span><span>✓ 精准人才推荐</span></div>
+              </div>
+              <button class="btn btn-outline btn-sm" id="btn-renew">续费 / 升级套餐</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end .content -->
+  </div><!-- end .main -->
+</div><!-- end .app -->
+
+<!-- 学生画像抽屉 -->
+<div class="drawer-mask" id="drawer-mask"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-hd">
+    <div class="av av-blue" id="d-av" style="width:42px;height:42px;font-size:16px;">陈</div>
+    <div style="flex:1;"><div class="drawer-title" id="d-name">陈晓雨</div><div style="font-size:12px;color:#8a94a8;" id="d-meta">浙江旅游职业学院 · 酒店管理专科 · 大三</div></div>
+    <button class="drawer-close" id="btn-close-drawer">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
+      <div style="text-align:center;padding:12px;background:linear-gradient(135deg,#EBF2FF,#F0EBFF);border-radius:10px;"><div style="font-size:26px;font-weight:800;color:#3B7EF8;" id="d-score">92</div><div style="font-size:11px;color:#8a94a8;margin-top:2px;">综合评分</div></div>
+      <div style="text-align:center;padding:12px;background:#F7F8FC;border-radius:10px;"><div style="font-size:18px;font-weight:800;" id="d-complete">96%</div><div style="font-size:11px;color:#8a94a8;margin-top:2px;">课程完成率</div></div>
+      <div style="text-align:center;padding:12px;background:#F7F8FC;border-radius:10px;"><div style="font-size:18px;font-weight:800;" id="d-quiz">88分</div><div style="font-size:11px;color:#8a94a8;margin-top:2px;">平均答题分</div></div>
+      <div style="text-align:center;padding:12px;background:#F7F8FC;border-radius:10px;"><div style="font-size:18px;font-weight:800;" id="d-train">42次</div><div style="font-size:11px;color:#8a94a8;margin-top:2px;">AI训练次数</div></div>
+    </div>
+    <div style="margin-bottom:18px;"><div style="font-size:13px;font-weight:700;margin-bottom:8px;">能力标签</div><div id="d-tags" style="display:flex;flex-wrap:wrap;gap:6px;"></div></div>
+    <div style="margin-bottom:18px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">能力维度画像</div>
+      <div style="display:flex;flex-direction:column;gap:9px;">
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>服务礼仪</span><strong>94分</strong></div><div class="pbar"><div class="pbar-fill pf-blue" style="width:94%"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>前台接待</span><strong>91分</strong></div><div class="pbar"><div class="pbar-fill pf-green" style="width:91%"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>投诉处理</span><strong>85分</strong></div><div class="pbar"><div class="pbar-fill pf-orange" style="width:85%"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>英语沟通</span><strong>88分</strong></div><div class="pbar"><div class="pbar-fill pf-blue" style="width:88%"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>餐饮服务</span><strong>82分</strong></div><div class="pbar"><div class="pbar-fill pf-green" style="width:82%"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>应急处理</span><strong>79分</strong></div><div class="pbar"><div class="pbar-fill pf-orange" style="width:79%"></div></div></div>
+      </div>
+    </div>
+    <div style="margin-bottom:18px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">教育经历</div>
+      <div style="border:1px solid #eaecf2;border-radius:10px;overflow:hidden;">
+        <div style="padding:12px 16px;display:flex;gap:16px;border-bottom:1px solid #F0F2F7;"><div style="font-size:12px;color:#8a94a8;width:110px;flex-shrink:0;">2022.09 - 至今</div><div><div style="font-size:13px;font-weight:700;" id="d-school">浙江旅游职业学院</div><div style="font-size:12px;color:#8a94a8;margin-top:2px;">酒店管理专业 · 专科</div></div></div>
+        <div style="padding:12px 16px;display:flex;gap:16px;"><div style="font-size:12px;color:#8a94a8;width:110px;flex-shrink:0;">2019.09 - 2022.06</div><div><div style="font-size:13px;font-weight:700;">杭州第十中学</div><div style="font-size:12px;color:#8a94a8;margin-top:2px;">高中</div></div></div>
+      </div>
+    </div>
+    <div style="margin-bottom:18px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">实习 / 实训经历</div>
+      <div style="border:1px solid #eaecf2;border-radius:10px;overflow:hidden;">
+        <div style="padding:12px 16px;display:flex;gap:16px;border-bottom:1px solid #F0F2F7;"><div style="font-size:12px;color:#8a94a8;width:110px;flex-shrink:0;">2024.07 - 2024.08</div><div><div style="font-size:13px;font-weight:700;">杭州君悦酒店 · 前台实习</div><div style="font-size:12px;color:#8a94a8;margin-top:2px;">负责入住接待、客诉处理，获实习优秀评价</div></div></div>
+        <div style="padding:12px 16px;display:flex;gap:16px;"><div style="font-size:12px;color:#8a94a8;width:110px;flex-shrink:0;">2023.12 - 2024.01</div><div><div style="font-size:13px;font-weight:700;">西溪悦椿酒店 · 客房实训</div><div style="font-size:12px;color:#8a94a8;margin-top:2px;">参与校内实训周，获客房服务满分评定</div></div></div>
+      </div>
+    </div>
+    <div style="margin-bottom:18px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">近期学习动态</div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-time">2026-04-18</div><div class="tl-text">完成「前台接待标准流程」课程，得分 96 分</div></div>
+        <div class="tl-item"><div class="tl-time">2026-04-17</div><div class="tl-text">完成 AI 角色扮演训练「挑剔商务客人接待」，评分 A+</div></div>
+        <div class="tl-item"><div class="tl-time">2026-04-15</div><div class="tl-text">完成「投诉处理技巧」章节测验，正确率 92%</div></div>
+        <div class="tl-item"><div class="tl-time">2026-04-12</div><div class="tl-text">向 AI 问答提问「如何应对 VIP 客人特殊需求」</div></div>
+        <div class="tl-item"><div class="tl-time">2026-04-10</div><div class="tl-text">完成「服务礼仪规范」课程，得分 98 分</div></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;padding-top:16px;border-top:1px solid #eaecf2;">
+      <button class="btn btn-primary" style="flex:1;justify-content:center;" id="btn-drawer-invite">邀请投递职位</button>
+      <button class="btn btn-outline" style="flex:1;justify-content:center;" id="btn-download-resume">下载简历 PDF</button>
+      <button class="btn btn-ghost" id="btn-collect">⭐ 收藏</button>
+    </div>
+  </div>
+</div>
+
+<!-- 邀请投递模态框 -->
+<div class="modal-mask" id="modal-invite">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title">邀请投递职位</div><button class="modal-close-btn" data-modal="modal-invite">✕</button></div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#F7F8FC;border-radius:10px;margin-bottom:16px;">
+        <div class="av av-blue" id="invite-av">陈</div>
+        <div><div style="font-weight:700;" id="invite-name">陈晓雨</div><div style="font-size:12px;color:#8a94a8;">浙江旅游职业学院 · 综合评分 92</div></div>
+      </div>
+      <div class="form-group"><label class="form-label">邀请投递职位</label><select class="form-select"><option>前台接待专员（上海浦东）</option><option>客房服务员（北京朝阳）</option><option>餐饮运营助理（广州天河）</option><option>大堂副理（成都锦江）</option></select></div>
+      <div class="form-group"><label class="form-label">邀请语</label><textarea class="form-textarea">您好！我们在平台上看到了您的学习档案，对您的综合能力印象深刻。诚邀您投递我们的职位，期待与您进一步交流！</textarea></div>
+      <div class="form-group"><label class="form-label">截止日期</label><input type="date" class="form-input" value="2026-05-19"></div>
+    </div>
+    <div class="modal-ft"><button class="btn btn-ghost" data-modal="modal-invite">取消</button><button class="btn btn-primary" id="btn-send-invite">发送邀请</button></div>
+  </div>
+</div>
+
+<!-- 发布职位模态框 -->
+<div class="modal-mask" id="modal-job">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title">发布新职位</div><button class="modal-close-btn" data-modal="modal-job">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">职位名称</label><input type="text" class="form-input" placeholder="如：前台接待专员"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">工作城市</label><input type="text" class="form-input" placeholder="如：上海浦东"></div>
+        <div class="form-group"><label class="form-label">工作性质</label><select class="form-select"><option>全职</option><option>实习</option><option>兼职</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">薪资下限（元/月）</label><input type="number" class="form-input" placeholder="如：5000"></div>
+        <div class="form-group"><label class="form-label">薪资上限（元/月）</label><input type="number" class="form-input" placeholder="如：8000"></div>
+      </div>
+      <div class="form-group"><label class="form-label">学历要求</label><select class="form-select"><option>不限</option><option>大专及以上</option><option>本科及以上</option></select></div>
+      <div class="form-group"><label class="form-label">专业要求</label><input type="text" class="form-input" placeholder="如：酒店管理、旅游管理"></div>
+      <div class="form-group"><label class="form-label">职位描述</label><textarea class="form-textarea" style="min-height:80px;" placeholder="请描述岗位职责、任职要求…"></textarea></div>
+      <div class="form-group"><label class="form-label">招聘截止日期</label><input type="date" class="form-input" value="2026-05-31"></div>
+    </div>
+    <div class="modal-ft"><button class="btn btn-ghost" data-modal="modal-job">取消</button><button class="btn btn-primary" id="btn-publish-job">立即发布</button></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  /* =========================================================
+     页面配置
+  ========================================================= */
+  const PAGE_CFG = {
+    dashboard:    { title: '数据概览',  sub: '/ 工作台' },
+    talent:       { title: '学生画像库', sub: '/ 人才库' },
+    schools:      { title: '院校数据',  sub: '/ 人才库' },
+    jobs:         { title: '职位管理',  sub: '/ 招聘管理' },
+    applications: { title: '投递管理',  sub: '/ 招聘管理' },
+    interview:    { title: '面试安排',  sub: '/ 招聘管理' },
+    notify:       { title: '消息通知',  sub: '/ 账号' },
+    settings:     { title: '企业设置',  sub: '/ 账号' }
+  };
+
+  /* =========================================================
+     核心导航函数
+  ========================================================= */
+  function goPage(id) {
+    if (!PAGE_CFG[id]) return;
+    // 切换页面
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const pg = document.getElementById('page-' + id);
+    if (pg) pg.classList.add('active');
+    // 更新顶栏
+    document.getElementById('tb-title').textContent = PAGE_CFG[id].title;
+    document.getElementById('tb-sub').textContent   = PAGE_CFG[id].sub;
+    // 更新侧边栏高亮
+    document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
+    const navBtn = document.querySelector('.sb-item[data-page="' + id + '"]');
+    if (navBtn) navBtn.classList.add('active');
+    // 通知页：清角标
+    if (id === 'notify') {
+      const b = document.getElementById('badge-notify');
+      if (b) b.remove();
+      const dot = document.getElementById('tb-dot');
+      if (dot) dot.style.display = 'none';
+      const lbl = document.getElementById('notify-unread-label');
+      if (lbl) lbl.textContent = '已全部已读';
+    }
+  }
+
+  /* =========================================================
+     侧边栏所有导航按钮 —— 统一用 data-page 绑定
+  ========================================================= */
+  document.querySelectorAll('.sb-item[data-page]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      goPage(this.dataset.page);
+    });
+  });
+
+  /* =========================================================
+     带 data-page 的任意按钮（顶栏通知、职位卡片"查看投递"等）
+  ========================================================= */
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-page]');
+    if (btn && !btn.classList.contains('sb-item')) {
+      goPage(btn.dataset.page);
+    }
+  });
+
+  /* =========================================================
+     侧边栏折叠
+  ========================================================= */
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+  }
+  document.getElementById('btn-toggle-sidebar').addEventListener('click', toggleSidebar);
+  document.getElementById('btn-toggle-sidebar2').addEventListener('click', toggleSidebar);
+
+  /* =========================================================
+     Toast
+  ========================================================= */
+  let toastTimer = null;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  /* =========================================================
+     筛选标签切换
+  ========================================================= */
+  document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('ftag')) {
+      const group = e.target.closest('.fbar');
+      if (group) group.querySelectorAll('.ftag').forEach(t => t.classList.remove('active'));
+      e.target.classList.add('active');
+    }
+  });
+
+  /* =========================================================
+     视图切换（卡片 / 列表）
+  ========================================================= */
+  document.getElementById('btn-view-grid').addEventListener('click', function () {
+    document.getElementById('view-grid').style.display = 'block';
+    document.getElementById('view-list').style.display = 'none';
+    showToast('已切换为卡片视图');
+  });
+  document.getElementById('btn-view-list').addEventListener('click', function () {
+    document.getElementById('view-grid').style.display = 'none';
+    document.getElementById('view-list').style.display = 'block';
+    showToast('已切换为列表视图');
+  });
+
+  /* =========================================================
+     学生画像抽屉
+  ========================================================= */
+  const TAG_COLORS = ['tag-blue','tag-green','tag-orange','tag-purple','tag-red'];
+
+  function openDrawer(dataStr) {
+    const parts = dataStr.split('|');
+    // parts: 姓名|院校|专业年级|评分|完成率|答题分|训练次|头像
+class|标签
+    const [name, school, meta, score, complete, quiz, train, avCls, tagsStr] = parts;
+
+    // 头部
+    const av = document.getElementById('d-av');
+    av.className = 'av ' + avCls;
+    av.style.cssText = 'width:42px;height:42px;font-size:16px;';
+    av.textContent = name.charAt(0);
+    document.getElementById('d-name').textContent = name;
+    document.getElementById('d-meta').textContent = school + ' · ' + meta;
+    document.getElementById('d-school').textContent = school;
+
+    // 数据
+    document.getElementById('d-score').textContent    = score;
+    document.getElementById('d-complete').textContent = complete;
+    document.getElementById('d-quiz').textContent     = quiz;
+    document.getElementById('d-train').textContent    = train;
+
+    // 标签
+    const tagsEl = document.getElementById('d-tags');
+    tagsEl.innerHTML = '';
+    if (tagsStr) {
+      tagsStr.split(',').forEach(function (t, i) {
+        const sp = document.createElement('span');
+        sp.className = 'tag ' + TAG_COLORS[i % TAG_COLORS.length];
+        sp.textContent = t.trim();
+        tagsEl.appendChild(sp);
+      });
+    }
+
+    // 抽屉底部邀请按钮记住姓名
+    document.getElementById('btn-drawer-invite').dataset.name = name;
+
+    // 打开
+    document.getElementById('drawer-mask').classList.add('open');
+    document.getElementById('drawer').classList.add('open');
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawer-mask').classList.remove('open');
+    document.getElementById('drawer').classList.remove('open');
+  }
+
+  // 点击遮罩关闭抽屉
+  document.getElementById('drawer-mask').addEventListener('click', closeDrawer);
+  document.getElementById('btn-close-drawer').addEventListener('click', closeDrawer);
+
+  // 所有"查看画像"按钮 —— 统一用 data-student 绑定
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.btn-view-profile');
+    if (!btn) return;
+    e.stopPropagation();
+    // 优先取按钮自身 data-student，否则找最近的 .sc 卡片
+    const dataStr = btn.dataset.student || btn.closest('.sc')?.dataset.student;
+    if (dataStr) openDrawer(dataStr);
+  });
+
+  // 学生卡片整体点击
+  document.addEventListener('click', function (e) {
+    const card = e.target.closest('.sc');
+    if (!card) return;
+    // 如果点的是按钮，不重复触发
+    if (e.target.closest('.btn')) return;
+    if (card.dataset.student) openDrawer(card.dataset.student);
+  });
+
+  /* =========================================================
+     邀请投递模态框
+  ========================================================= */
+  function openInviteModal(name) {
+    document.getElementById('invite-name').textContent = name;
+    document.getElementById('invite-av').textContent   = name.charAt(0);
+    document.getElementById('modal-invite').classList.add('open');
+  }
+
+  // 抽屉内"邀请投递"按钮
+  document.getElementById('btn-drawer-invite').addEventListener('click', function () {
+    const name = this.dataset.name || document.getElementById('d-name').textContent;
+    closeDrawer();
+    openInviteModal(name);
+  });
+
+  // 所有"邀请投递"按钮（.btn-invite）
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.btn-invite');
+    if (!btn) return;
+    e.stopPropagation();
+    const name = btn.dataset.name ||
+                 btn.closest('.sc')?.querySelector('.sc-name')?.textContent ||
+                 '该学生';
+    openInviteModal(name);
+  });
+
+  // 发送邀请
+  document.getElementById('btn-send-invite').addEventListener('click', function () {
+    const name = document.getElementById('invite-name').textContent;
+    document.getElementById('modal-invite').classList.remove('open');
+    showToast('邀请已成功发送给 ' + name);
+  });
+
+  /* =========================================================
+     发布职位模态框
+  ========================================================= */
+  document.getElementById('btn-open-job-modal').addEventListener('click', function () {
+    document.getElementById('modal-job').classList.add('open');
+  });
+
+  document.getElementById('btn-publish-job').addEventListener('click', function () {
+    document.getElementById('modal-job').classList.remove('open');
+    showToast('职位已发布，学生端即时可见');
+  });
+
+  /* =========================================================
+     模态框通用关闭（data-modal 按钮 + 点击遮罩）
+  ========================================================= */
+  document.addEventListener('click', function (e) {
+    // 关闭按钮
+    const closeBtn = e.target.closest('.modal-close-btn, [data-modal]');
+    if (closeBtn) {
+      const modalId = closeBtn.dataset.modal;
+      if (modalId) document.getElementById(modalId).classList.remove('open');
+    }
+    // 点击遮罩
+    if (e.target.classList.contains('modal-mask')) {
+      e.target.classList.remove('open');
+    }
+  });
+
+  /* =========================================================
+     院校列表切换
+  ========================================================= */
+  document.querySelectorAll('.school-item[data-school]').forEach(function (item) {
+    item.addEventListener('click', function () {
+      // 高亮
+      document.querySelectorAll('.school-item').forEach(i => i.classList.remove('active'));
+      this.classList.add('active');
+
+      // 解析数据：名称|层次|学生数|评分|活跃率|专业
+      const parts = this.dataset.school.split('|');
+      const [name, type, students, score, active] = parts;
+
+      document.getElementById('sd-name').textContent     = name;
+      document.getElementById('sd-students').textContent = students;
+      document.getElementById('sd-score').textContent    = score;
+      document.getElementById('sd-active').textContent   = active;
+      document.getElementById('sd-type').textContent     = type;
+
+      showToast('已切换到：' + name);
+    });
+  });
+
+  /* =========================================================
+     投递状态更新
+  ========================================================= */
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.btn-set-status');
+    if (!btn) return;
+    const targetId = btn.dataset.target;
+    const status   = btn.dataset.status;
+    const cls      = btn.dataset.cls;
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    // 移除所有 tag-* 颜色类
+    el.className = 'tag app-status ' + cls;
+    el.textContent = status;
+    showToast('状态已更新为：' + status);
+  });
+
+  /* =========================================================
+     各独立按钮事件
+  ========================================================= */
+  // 筛选 / 重置
+  document.getElementById('btn-filter').addEventListener('click', function () { showToast('筛选条件已应用'); });
+  document.getElementById('btn-reset').addEventListener('click', function () { showToast('筛选条件已重置'); });
+
+  // 导出
+  document.getElementById('btn-export').addEventListener('click', function () { showToast('正在导出 Excel…'); });
+
+  // 职位编辑
+  document.getElementById('btn-edit-job1').addEventListener('click', function () { showToast('编辑「前台接待专员」'); });
+  document.getElementById('btn-edit-job2').addEventListener('click', function () { showToast('编辑「客房服务员」'); });
+  document.getElementById('btn-reopen-job').addEventListener('click', function () { showToast('「宴会策划助理」已重新开放'); });
+
+  // 投递管理
+  document.getElementById('btn-send-offer').addEventListener('click', function () { showToast('入职通知已发送'); });
+
+  // 面试安排
+  document.getElementById('btn-join-interview').addEventListener('click', function () { showToast('正在进入视频面试…'); });
+  document.getElementById('btn-send-remind').addEventListener('click', function () { showToast('面试提醒已发送'); });
+  document.getElementById('btn-reschedule1').addEventListener('click', function () { showToast('改期申请已发送'); });
+  document.getElementById('btn-reschedule2').addEventListener('click', function () { showToast('改期申请已发送'); });
+  document.getElementById('btn-confirm-interview').addEventListener('click', function () { showToast('面试已安排，通知已发送给候选人'); });
+
+  // 通知页全部已读
+  document.getElementById('btn-read-all').addEventListener('click', function () {
+    document.querySelectorAll('.ni-dot').forEach(d => d.remove());
+    const lbl = document.getElementById('notify-unread-label');
+    if (lbl) lbl.textContent = '已全部已读';
+    showToast('已全部标记为已读');
+  });
+
+  // 设置页
+  document.getElementById('btn-save-settings').addEventListener('click', function () { showToast('企业信息已保存'); });
+  document.getElementById('btn-invite-member').addEventListener('click', function () { showToast('邀请链接已复制到剪贴板'); });
+  document.getElementById('btn-renew').addEventListener('click', function () { showToast('正在跳转续费页面…'); });
+  document.querySelectorAll('.btn-edit-member').forEach(function (b) {
+    b.addEventListener('click', function () { showToast('编辑成员权限'); });
+  });
+
+  // 抽屉内操作
+  document.getElementById('btn-download-resume').addEventListener('click', function () { showToast('简历 PDF 下载中…'); });
+  document.getElementById('btn-collect').addEventListener('click', function () {
+    this.textContent = '⭐ 已收藏';
+    showToast('已收藏该学生');
+  });
+
+  // 分页按钮（通用）
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.pg-btn');
+    if (!btn || btn.classList.contains('active')) return;
+    const parent = btn.closest('.pg-btns');
+    if (parent) parent.querySelectorAll('.pg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    showToast('跳转到第 ' + (btn.textContent.trim()) + ' 页');
+  });
+
+  /* =========================================================
+     ESC 关闭所有弹层
+  ========================================================= */
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      closeDrawer();
+      document.querySelectorAll('.modal-mask').forEach(m => m.classList.remove('open'));
+    }
+  });
+
+}); // end DOMContentLoaded
+</script>
+</body>
+</html>
+
+
