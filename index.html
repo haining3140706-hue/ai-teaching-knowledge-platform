@@ -828,8 +828,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function openDrawer(dataStr) {
     const parts = dataStr.split('|');
-    // parts: 姓名|院校|专业年级|评分|完成率|答题分|训练次|头像
-class|标签
+    // parts: 姓名|院校|专业年级|评分|完成率|答题分|训练次|头像类|标签
     const [name, school, meta, score, complete, quiz, train, avCls, tagsStr] = parts;
 
     // 头部
